@@ -104,6 +104,31 @@ def plot_path(observations, variance = None, path="results/extended_path.png"):
     plt.legend()
     plt.savefig(path)
     plt.close()
+
+
+def plot_time_colored_path(observations, path="results/observed_path_colored.png"):
+    plt.figure(figsize=(8, 8))
+    plt.xlim(l_bound, u_bound)
+    plt.ylim(l_bound, u_bound)
+    plt.scatter(sensor_A_location[0], sensor_A_location[1], c='red', label='Sensor A')
+    plt.scatter(sensor_B_location[0], sensor_B_location[1], c='blue', label='Sensor B')
+
+    time_index = np.arange(len(observations))
+    scatter = plt.scatter(
+        observations[:, 0],
+        observations[:, 1],
+        c=time_index,
+        cmap='viridis',
+        alpha=0.8,
+        label='Triangulated Path',
+    )
+    plt.xlabel("East-West (km)")
+    plt.ylabel("North-South (km)")
+    plt.legend()
+    colorbar = plt.colorbar(scatter)
+    colorbar.set_label("Time Step")
+    plt.savefig(path)
+    plt.close()
     
 def plot_particle_weights_histogram(weights, title="Particle Weights", path="results/particle_weights_histogram.png"):
     plt.figure(figsize=(8, 6))
@@ -114,3 +139,35 @@ def plot_particle_weights_histogram(weights, title="Particle Weights", path="res
     plt.grid()
     plt.savefig(path)
     plt.close()
+
+def plot_particle_weights_histogram_evolution(weights, path):
+    plt.figure(figsize=(8, 6))
+    plot_every = max(1, len(weights) // 10)  # Plot at most 10 histograms
+    for i in range(0, len(weights), plot_every):
+        plt.bar(range(len(weights[i])), weights[i], alpha=0.7, color='blue')
+        plt.title(f"Particle Weights at Step {i}")
+        plt.xlabel("Weight")
+        plt.ylabel("Density")
+    plt.grid()
+    plt.savefig(path)
+    plt.close()
+
+
+def plot_covariance_traces(covariance_series, labels, path="results/covariance_traces.png"):
+    state_labels = ["East Position", "North Position"]
+    fig, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+    axes = axes.ravel()
+
+    for dimension, axis in enumerate(axes):
+        for covariances, label in zip(covariance_series, labels):
+            axis.plot(covariances[:, dimension, dimension], label=label, linewidth=1.5)
+        axis.set_title(state_labels[dimension])
+        axis.set_xlabel("Time Step")
+        axis.set_ylabel("Variance")
+        axis.grid(alpha=0.3)
+
+    axes[0].legend()
+    fig.tight_layout()
+    fig.savefig(path)
+    plt.close(fig)
+

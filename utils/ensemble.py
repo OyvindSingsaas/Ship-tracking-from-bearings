@@ -21,7 +21,7 @@ def estimated_kalman_gain(predicted_particles, predicted_observations):
     observation_mean = ensemble_mean(predicted_observations)
 
     centered_states = predicted_particles - state_mean
-    centered_observations = wrap_to_pi(predicted_observations - observation_mean)
+    centered_observations = predicted_observations - observation_mean
 
     cross_covariance = centered_states.T @ centered_observations / (particle_count - 1)
     observation_covariance = centered_observations.T @ centered_observations / (particle_count - 1)
@@ -39,7 +39,7 @@ def step_ensemble_kalman_filter(particles, observation):
         for _ in range(len(predicted_particles))
     ])
     predicted_observations = np.array([funcs.measurement_function(p) for p in predicted_particles])
-    innovations = wrap_to_pi(perturbed_observations - predicted_observations)
+    innovations = perturbed_observations - predicted_observations
     K = estimated_kalman_gain(predicted_particles, predicted_observations)
     updated_particles = predicted_particles + innovations @ K.T
     ensemble_covariance_estimate = ensemble_covariance(updated_particles, ensemble_mean(updated_particles))
